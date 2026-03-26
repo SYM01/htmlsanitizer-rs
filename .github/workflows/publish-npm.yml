@@ -11,20 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
+      - run: rustup target add wasm32-unknown-unknown
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        run: cargo install wasm-pack@0.14.0
       - name: Build WASM package
-        run: wasm-pack build --target nodejs --out-dir npm/pkg -- --features wasm
+        run: wasm-pack build --target bundler --out-dir npm/pkg -- --features wasm
       - name: Publish
         working-directory: npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: hashFiles('npm/package.json') != ''

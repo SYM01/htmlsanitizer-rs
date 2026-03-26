@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A fast, allowlist-based HTML sanitizer"
+repository = "https://github.com/SYM01/htmlsanitizer-rs"
 keywords = ["html", "sanitizer", "xss", "security"]
 categories = ["web-programming", "text-processing"]
 
@@ -16,7 +17,7 @@ wasm = ["wasm-bindgen", "js-sys"]
 
 [dependencies]
 url = "2"
-wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen = { version = "0.2.114", optional = true }
 js-sys = { version = "0.3", optional = true }
 
 [dev-dependencies]
@@ -25,3 +26,9 @@ criterion = { version = "0.5", features = ["html_reports"] }
 [[bench]]
 name = "sanitize"
 harness = false
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
