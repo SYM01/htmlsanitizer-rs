@@ -1,0 +1,41 @@
+{
+  "name": "@bytevet/htmlsanitizer",
+  "version": "0.1.0",
+  "description": "A fast, allowlist-based HTML sanitizer powered by WebAssembly",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/",
+    "pkg/"
+  ],
+  "scripts": {
+    "build:wasm": "wasm-pack build .. --target bundler --out-dir npm/pkg -- --features wasm",
+    "build:ts": "tsc",
+    "build": "npm run build:wasm && npm run build:ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
+    "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "html",
+    "sanitizer",
+    "xss",
+    "security",
+    "wasm",
+    "webassembly"
+  ]
+}
