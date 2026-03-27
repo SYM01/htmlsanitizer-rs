@@ -6,8 +6,12 @@ on:
       - "v*"
 
 permissions:
-  id-token: write # Required for OIDC
+  id-token: write # Required for npm provenance
   contents: read
+
+env:
+  WASM_PACK_VERSION: "0.14.0"
+  BINARYEN_VERSION: "128"
 
 jobs:
   publish:
@@ -15,40 +19,65 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set version from tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
           jq --arg v "$VERSION" '.version = $v' npm/package.json > tmp && mv tmp npm/package.json
+
       - run: rustup target add wasm32-unknown-unknown
+
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - uses: actions/cache@v4
+          cache: npm
+          cache-dependency-path: npm/package-lock.json
+
+      - name: Cache Cargo registry & build artifacts
+        uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin/wasm-pack
-          key: wasm-pack-0.14.0
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-wasm-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-wasm-
+
+      - name: Cache wasm-pack & binaryen
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/wasm-pack
+            /usr/local/bin/wasm-opt
+          key: wasm-tools-wasm-pack-${{ env.WASM_PACK_VERSION }}-binaryen-${{ env.BINARYEN_VERSION }}
+
       - name: Install wasm-pack
-        run: command -v wasm-pack || cargo install wasm-pack@0.14.0
+        run: command -v wasm-pack || cargo install wasm-pack@${{ env.WASM_PACK_VERSION }}
+
       - name: Install binaryen (wasm-opt)
         run: |
-          curl -sL https://github.com/WebAssembly/binaryen/releases/download/version_128/binaryen-version_128-x86_64-linux.tar.gz | tar xz
-          sudo mv binaryen-version_128/bin/wasm-opt /usr/local/bin/
+          command -v wasm-opt && exit 0
+          curl -sL "https://github.com/WebAssembly/binaryen/releases/download/version_${{ env.BINARYEN_VERSION }}/binaryen-version_${{ env.BINARYEN_VERSION }}-x86_64-linux.tar.gz" | tar xz
+          sudo mv "binaryen-version_${{ env.BINARYEN_VERSION }}/bin/wasm-opt" /usr/local/bin/
+
       - name: Build WASM package
         run: wasm-pack build --target bundler --out-dir npm/pkg -- --features wasm
+
       - name: Optimize WASM binary
         run: wasm-opt -Oz --all-features npm/pkg/htmlsanitizer_bg.wasm -o npm/pkg/htmlsanitizer_bg.wasm
+
       - name: Remove pkg .gitignore
         run: rm -f npm/pkg/.gitignore
+
       - name: Build & test
         working-directory: npm
         run: |
-          npm install
+          npm ci
           npm run build:ts
           npm test
+
       - name: Publish
         working-directory: npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance
