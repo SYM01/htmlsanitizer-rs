@@ -26,6 +26,6 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-publish-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
           restore-keys: ${{ runner.os }}-cargo-publish-
-      - run: cargo publish
+      - run: cargo publish --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
