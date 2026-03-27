@@ -10,7 +10,6 @@ npm/pkg/
 node_modules/
 npm/dist/
 npm/*.tgz
-npm/package-lock.json
 
 # Fuzz
 fuzz/target/
