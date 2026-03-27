@@ -3,6 +3,10 @@
   "version": "0.1.1",
   "description": "A fast, allowlist-based HTML sanitizer powered by WebAssembly",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SYM01/htmlsanitizer-rs"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
