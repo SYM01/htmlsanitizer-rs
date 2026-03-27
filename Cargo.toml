@@ -32,3 +32,8 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 strip = true
+
+# wasm-pack's bundled wasm-opt does not support bulk memory operations
+# emitted by modern Rust. Rust's own LTO already optimizes the binary well.
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

@@ -14,6 +14,12 @@ pub struct WasmHtmlSanitizer {
     inner: HtmlSanitizer,
 }
 
+impl Default for WasmHtmlSanitizer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[wasm_bindgen]
 impl WasmHtmlSanitizer {
     /// Create a new sanitizer with the default allow list.

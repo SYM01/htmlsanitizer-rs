@@ -1,6 +1,7 @@
 //! Additional sanitization tests beyond the core Go test suite.
 //! Covers: multi-XSS payloads, edge cases, Unicode, deeply nested tags,
 //! long inputs, and additional OWASP vectors.
+#![allow(clippy::invisible_characters)]
 
 use htmlsanitizer::sanitize_string;
 
