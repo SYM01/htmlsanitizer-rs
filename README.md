@@ -6,7 +6,7 @@
 [![CI](https://github.com/SYM01/htmlsanitizer-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/SYM01/htmlsanitizer-rs/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A fast, allowlist-based HTML sanitizer. Available as a **Rust crate** and an **npm package** (via WebAssembly).
+A fast, allowlist-based HTML sanitizer. Available as a **Rust crate** and an **npm package** (via WebAssembly). [**3.7–44x faster**](#performance) than DOMPurify on real HTML content.
 
 Also available in [Go](https://github.com/SYM01/htmlsanitizer).
 
@@ -281,6 +281,28 @@ You can supply a custom URL validator via `with_url_sanitizer` (Rust) to impleme
 ## Performance
 
 The sanitizer operates in a single O(n) pass over the input using a 17-state DFA. It allocates no DOM tree and performs no backtracking.
+
+### npm: `@bytevet/htmlsanitizer` vs [DOMPurify](https://github.com/cure53/DOMPurify)
+
+Benchmarked with [Vitest bench](https://vitest.dev/guide/features#benchmarking) on Node.js (DOMPurify uses jsdom):
+
+| Payload | @bytevet/htmlsanitizer | DOMPurify + jsdom | Ratio |
+|---|---|---|---|
+| Simple HTML (small) | 56,716 ops/s | 15,253 ops/s | **3.7x faster** |
+| XSS vectors | 40,908 ops/s | 5,373 ops/s | **7.6x faster** |
+| Blog post (medium) | 33,259 ops/s | 1,381 ops/s | **24x faster** |
+| Mixed safe + dangerous | 40,326 ops/s | 3,987 ops/s | **10x faster** |
+| Large document (~50 KB) | 1,054 ops/s | 24 ops/s | **44x faster** |
+
+> DOMPurify is faster on tiny plain-text inputs (no HTML tags) due to WASM call overhead (~10 µs). For any real HTML content, `@bytevet/htmlsanitizer` is **3.7–44x faster**, with the advantage growing as input size increases.
+
+Reproduce with:
+
+```bash
+cd bench-npm && npm install && npm run bench
+```
+
+### Rust
 
 ```bash
 cargo bench
