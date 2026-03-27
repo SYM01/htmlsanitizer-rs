@@ -92,11 +92,13 @@ jobs:
       - name: Install wasm-pack
         run: cargo install wasm-pack@0.14.0
       - name: Install binaryen (wasm-opt)
-        run: sudo apt-get install -y binaryen
+        run: |
+          curl -sL https://github.com/WebAssembly/binaryen/releases/download/version_128/binaryen-version_128-x86_64-linux.tar.gz | tar xz
+          sudo mv binaryen-version_128/bin/wasm-opt /usr/local/bin/
       - name: Build WASM package
         run: wasm-pack build --target bundler --out-dir npm/pkg -- --features wasm
       - name: Optimize WASM binary
-        run: wasm-opt -Oz --enable-bulk-memory npm/pkg/htmlsanitizer_bg.wasm -o npm/pkg/htmlsanitizer_bg.wasm
+        run: wasm-opt -Oz --all-features npm/pkg/htmlsanitizer_bg.wasm -o npm/pkg/htmlsanitizer_bg.wasm
       - name: Remove pkg .gitignore
         run: rm -f npm/pkg/.gitignore
       - name: Install npm deps & test
