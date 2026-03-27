@@ -91,8 +91,14 @@ jobs:
           node-version: 22
       - name: Install wasm-pack
         run: cargo install wasm-pack@0.14.0
+      - name: Install binaryen (wasm-opt)
+        run: sudo apt-get install -y binaryen
       - name: Build WASM package
         run: wasm-pack build --target bundler --out-dir npm/pkg -- --features wasm
+      - name: Optimize WASM binary
+        run: wasm-opt -Oz --enable-bulk-memory npm/pkg/htmlsanitizer_bg.wasm -o npm/pkg/htmlsanitizer_bg.wasm
+      - name: Remove pkg .gitignore
+        run: rm -f npm/pkg/.gitignore
       - name: Install npm deps & test
         working-directory: npm
         run: |
