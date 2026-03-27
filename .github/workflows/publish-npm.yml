@@ -35,8 +35,8 @@ jobs:
       - name: Build & test
         working-directory: npm
         run: |
-          npx tsc
           npm install
+          npx tsc
           npm test
       - name: Publish
         working-directory: npm
