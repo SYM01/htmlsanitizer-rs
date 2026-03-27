@@ -36,7 +36,7 @@ jobs:
         working-directory: npm
         run: |
           npm install
-          npx tsc
+          npm run build:ts
           npm test
       - name: Publish
         working-directory: npm
