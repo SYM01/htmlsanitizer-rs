@@ -12,12 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup target add wasm32-unknown-unknown
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-pack
+          key: wasm-pack-0.14.0
       - name: Install wasm-pack
-        run: cargo install wasm-pack@0.14.0
+        run: command -v wasm-pack || cargo install wasm-pack@0.14.0
       - name: Install binaryen (wasm-opt)
         run: sudo apt-get install -y binaryen
       - name: Build WASM package
@@ -26,9 +30,12 @@ jobs:
         run: wasm-opt -Oz --enable-bulk-memory npm/pkg/htmlsanitizer_bg.wasm -o npm/pkg/htmlsanitizer_bg.wasm
       - name: Remove pkg .gitignore
         run: rm -f npm/pkg/.gitignore
-      - name: Build TypeScript
+      - name: Build & test
         working-directory: npm
-        run: npx tsc
+        run: |
+          npx tsc
+          npm install
+          npm test
       - name: Publish
         working-directory: npm
         run: npm publish --access public
